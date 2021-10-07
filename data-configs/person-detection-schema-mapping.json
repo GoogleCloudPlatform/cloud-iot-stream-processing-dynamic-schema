@@ -1,0 +1,14 @@
+{
+  "cloudIoT.attr.deviceNumId": "DeviceNumId",
+  "cloudIoT.attr.deviceId": "DeviceId",
+  "cloudIoT.attr.deviceRegistryId": "RegistryId",
+  "person_detection[]": {
+    "ts": "TimeStamp",
+    "label": "Label",
+    "score": "Score",
+    "detection_x1": "X1",
+    "detection_x2": "X2",
+    "detection_y1": "Y1",
+    "detection_y2": "Y2"
+  }
+}
