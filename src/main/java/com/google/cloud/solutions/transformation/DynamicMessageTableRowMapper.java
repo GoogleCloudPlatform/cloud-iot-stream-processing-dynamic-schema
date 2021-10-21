@@ -21,7 +21,10 @@ import com.google.cloud.solutions.common.TableRowWithMessageInfo;
 import com.google.cloud.solutions.utils.TableSchemaLoader;
 import java.util.Map;
 import org.apache.beam.sdk.transforms.SerializableFunction;
+import org.joda.time.DateTimeZone;
 import org.joda.time.Instant;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 /**
  * Transforms the row map in {@link TableRowWithMessageInfo} to BigQuery {@link TableRow} object The
@@ -43,6 +46,8 @@ public class DynamicMessageTableRowMapper
     implements SerializableFunction<TableRowWithMessageInfo, TableRow> {
 
   private static final long serialVersionUID = 6891268007272455587L;
+  private static DateTimeFormatter TIME_STAMP_FORMAT =
+      DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss.SSSSSS").withZone(DateTimeZone.forID("UTC"));
 
   @Override
   public TableRow apply(TableRowWithMessageInfo input) {
@@ -70,15 +75,7 @@ public class DynamicMessageTableRowMapper
         retObject = Long.parseLong(valueStr);
         break;
       case "timestamp":
-        try {
-          long epochMilli = Long.parseLong(valueStr);
-          if (valueStr.length() > 13) {
-            epochMilli = Long.parseLong(valueStr.substring(0, 13));
-          }
-          retObject = Instant.ofEpochMilli(epochMilli).toString();
-        } catch (NumberFormatException nfe) {
-          retObject = valueStr;
-        }
+        retObject = parseTimeStamp(valueStr);
         break;
       case "float":
         retObject = Double.parseDouble(valueStr);
@@ -89,5 +86,23 @@ public class DynamicMessageTableRowMapper
         break;
     }
     return retObject;
+  }
+
+  private Object parseTimeStamp(String valueStr) {
+    try {
+      long epochMilli = Long.parseLong(valueStr);
+      if (valueStr.length() > 13) {
+        epochMilli = Long.parseLong(valueStr.substring(0, 13));
+      }
+      return Instant.ofEpochMilli(epochMilli).toString();
+    } catch (NumberFormatException nfe) {
+    }
+
+    try {
+      return Instant.parse(valueStr, TIME_STAMP_FORMAT).toString();
+    } catch (Exception e) {
+    }
+
+    return valueStr;
   }
 }
