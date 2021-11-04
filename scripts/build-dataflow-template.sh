@@ -27,5 +27,6 @@ fi
 docker run -it --rm --name my-maven-project -v "$(pwd)":/usr/src/mymaven -w /usr/src/mymaven maven:3.6.3-jdk-11 mvn compile exec:java -Dexec.mainClass=com.google.cloud.solutions.IoTStreamDynamicMapping -Dexec.args="\
 --runner=DataflowRunner \
 --project=${GOOGLE_CLOUD_PROJECT} \
+--region=${GOOGLE_CLOUD_REGION} \
 --stagingLocation=gs://${DATAFLOW_TEMPLATE_BUCKET}/staging \
 --templateLocation=gs://${DATAFLOW_TEMPLATE_BUCKET}/templates/iot-stream-processing" -Pdataflow-runner

@@ -27,28 +27,28 @@
   <packaging>jar</packaging>
 
   <properties>
-    <beam.version>2.20.0</beam.version>
+    <beam.version>2.25.0</beam.version>
 
-    <bigquery.version>v2-rev20190917-1.30.3</bigquery.version>
-    <google-api-client.version>1.30.3</google-api-client.version>
+    <bigquery.version>v2-rev20200719-1.30.10</bigquery.version>
+    <google-api-client.version>1.30.10</google-api-client.version>
     <google-http-client.version>1.34.0</google-http-client.version>
-    <cloudiot.version>v1-rev101-1.18.0-rc</cloudiot.version>
+    <cloudiot.version>v1-rev20211004-1.32.1</cloudiot.version>
     <hamcrest.version>2.1</hamcrest.version>
     <jackson.version>2.10.2</jackson.version>
     <joda.version>2.10.5</joda.version>
-    <junit.version>4.13.1</junit.version>
+    <junit.version>4.13-beta-3</junit.version>
     <maven-compiler-plugin.version>3.7.0</maven-compiler-plugin.version>
     <maven-exec-plugin.version>1.6.0</maven-exec-plugin.version>
     <maven-jar-plugin.version>3.0.2</maven-jar-plugin.version>
     <maven-shade-plugin.version>3.1.0</maven-shade-plugin.version>
     <mockito.version>3.8.0</mockito.version>
-    <pubsub.version>v1-rev20191111-1.30.3</pubsub.version>
-    <slf4j.version>1.7.25</slf4j.version>
-    <spark.version>2.4.5</spark.version>
+    <pubsub.version>v1-rev20200713-1.30.10</pubsub.version>
+    <slf4j.version>1.7.30</slf4j.version>
+    <spark.version>2.4.6</spark.version>
     <hadoop.version>2.8.5</hadoop.version>
-    <maven-surefire-plugin.version>2.21.0</maven-surefire-plugin.version>
+    <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
     <nemo.version>0.1</nemo.version>
-    <flink.artifact.name>beam-runners-flink-1.9</flink.artifact.name>
+    <flink.artifact.name>beam-runners-flink-1.10</flink.artifact.name>
   </properties>
 
   <repositories>
@@ -64,9 +64,9 @@
       </snapshots>
     </repository>
     <repository>
-		    <id>jitpack.io</id>
-		    <url>https://jitpack.io</url>
-		</repository>
+      <id>jitpack.io</id>
+      <url>https://jitpack.io</url>
+    </repository>
   </repositories>
 
   <build>
@@ -191,52 +191,6 @@
     </profile>
 
     <profile>
-      <id>apex-runner</id>
-      <!-- Makes the ApexRunner available when running a pipeline. -->
-      <dependencies>
-        <dependency>
-          <groupId>org.apache.beam</groupId>
-          <artifactId>beam-runners-apex</artifactId>
-          <version>${beam.version}</version>
-          <scope>runtime</scope>
-        </dependency>
-        <!--
-          Apex depends on httpclient version 4.3.6, project has a transitive dependency to httpclient 4.0.1 from
-          google-http-client. Apex dependency version being specified explicitly so that it gets picked up. This
-          can be removed when the project no longer has a dependency on a different httpclient version.
-        -->
-        <dependency>
-          <groupId>org.apache.httpcomponents</groupId>
-          <artifactId>httpclient</artifactId>
-          <version>4.3.6</version>
-          <scope>runtime</scope>
-          <exclusions>
-            <exclusion>
-              <groupId>commons-codec</groupId>
-              <artifactId>commons-codec</artifactId>
-            </exclusion>
-          </exclusions>
-        </dependency>
-        <!--
-          Apex 3.6 is built against YARN 2.6. Version in the fat jar has to match
-          what's on the cluster, hence we need to repeat the Apex Hadoop dependencies here.
-        -->
-        <dependency>
-          <groupId>org.apache.hadoop</groupId>
-          <artifactId>hadoop-yarn-client</artifactId>
-          <version>${hadoop.version}</version>
-          <scope>runtime</scope>
-        </dependency>
-        <dependency>
-          <groupId>org.apache.hadoop</groupId>
-          <artifactId>hadoop-common</artifactId>
-          <version>${hadoop.version}</version>
-          <scope>runtime</scope>
-        </dependency>
-      </dependencies>
-    </profile>
-
-    <profile>
       <id>dataflow-runner</id>
       <!-- Makes the DataflowRunner available when running a pipeline. -->
       <dependencies>
@@ -322,22 +276,22 @@
       </dependencies>
     </profile>
     <profile>
-      <id>gearpump-runner</id>
+      <id>samza-runner</id>
       <dependencies>
         <dependency>
           <groupId>org.apache.beam</groupId>
-          <artifactId>beam-runners-gearpump</artifactId>
+          <artifactId>beam-runners-samza</artifactId>
           <version>${beam.version}</version>
           <scope>runtime</scope>
         </dependency>
       </dependencies>
     </profile>
     <profile>
-      <id>samza-runner</id>
+      <id>twister2-runner</id>
       <dependencies>
         <dependency>
           <groupId>org.apache.beam</groupId>
-          <artifactId>beam-runners-samza</artifactId>
+          <artifactId>beam-runners-twister2</artifactId>
           <version>${beam.version}</version>
           <scope>runtime</scope>
         </dependency>
@@ -477,15 +431,21 @@
     </dependency>
 
     <dependency>
-      <groupId>com.google.auth</groupId>
-      <artifactId>google-auth-library-oauth2-http</artifactId>
-      <version>0.20.0</version>
-    </dependency>
-
-    <dependency>
       <groupId>com.google.apis</groupId>
       <artifactId>google-api-services-cloudiot</artifactId>
       <version>${cloudiot.version}</version>
+      <exclusions>
+        <!-- Exclude an old version of guava that is being pulled
+             in by a transitive dependency of google-api-client -->
+        <exclusion>
+          <groupId>com.google.guava</groupId>
+          <artifactId>guava-jdk5</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.google.api-client</groupId>
+          <artifactId>google-api-client</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>
@@ -524,7 +484,7 @@
 
     <dependency>
       <groupId>org.mockito</groupId>
-      <artifactId>mockito-inline</artifactId>
+      <artifactId>mockito-core</artifactId>
       <version>${mockito.version}</version>
       <scope>test</scope>
     </dependency>
