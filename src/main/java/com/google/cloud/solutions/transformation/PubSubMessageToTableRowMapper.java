@@ -117,9 +117,12 @@ public class PubSubMessageToTableRowMapper
         rows.addAll(rowsHolder);
       } else {
         for (Map<String, String> rowValues : rows) {
-          rowValues.put(
-              destinationTableField.getAsString(),
-              payloadJson.get(currentPayloadKey).getAsString());
+          JsonElement payloadElement = payloadJson.get(currentPayloadKey);
+          if (payloadElement != null) {
+            rowValues.put(
+                destinationTableField.getAsString(),
+                payloadElement.getAsString());
+          }
         }
       }
     } else {
